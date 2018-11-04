@@ -24,6 +24,9 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+/*modify add*/
+#include <sys/time.h>
+/*modify add end*/
 
 #include "ubertooth_callback.h"
 
@@ -409,8 +412,14 @@ void cb_btle(ubertooth_t* ut, void* args)
 		rx_ts += 3276800000;
 	u32 ts_diff = rx_ts - prev_ts;
 	prev_ts = rx->clk100ns;
-	printf("systime=%u freq=%d addr=%08x delta_t=%.03f ms rssi=%d\n",
-	       systime, rx->channel + 2402, lell_get_access_address(pkt),
+    /*modify add*/
+    struct timeval timestamp;
+    gettimeofday(&timestamp, NULL);
+    /*modify add end*/
+	printf("systime=%lu freq=%d addr=%08x delta_t=%.03f ms rssi=%d\n",
+	       /*modify replace "systime" with "timestamp"*/
+           timestamp.tv_sec*1000000+timestamp.tv_usec,
+           rx->channel + 2402, lell_get_access_address(pkt),
 	       ts_diff / 10000.0, rx->rssi_min - 54);
 
 	int len = (rx->data[5] & 0x3f) + 6 + 3;
