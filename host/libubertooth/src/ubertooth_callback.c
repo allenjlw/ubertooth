@@ -415,10 +415,12 @@ void cb_btle(ubertooth_t* ut, void* args)
     /*modify add*/
     struct timeval timestamp;
     gettimeofday(&timestamp, NULL);
+    uint64_t stime = timestamp.tv_sec;
+    stime = stime * 1000000 + timestamp.tv_usec;
     /*modify add end*/
-	printf("systime=%lu freq=%d addr=%08x delta_t=%.03f ms rssi=%d\n",
-	       /*modify replace "systime" with "timestamp"*/
-           timestamp.tv_sec*1000000+timestamp.tv_usec,
+	printf("systime=%llu freq=%d addr=%08x delta_t=%.03f ms rssi=%d\n",
+	       /*modify replace "systime" with "stime"*/
+		stime,
            rx->channel + 2402, lell_get_access_address(pkt),
 	       ts_diff / 10000.0, rx->rssi_min - 54);
 
