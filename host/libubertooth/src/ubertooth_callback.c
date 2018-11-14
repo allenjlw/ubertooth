@@ -417,22 +417,29 @@ void cb_btle(ubertooth_t* ut, void* args)
     gettimeofday(&timestamp, NULL);
     uint64_t stime = timestamp.tv_sec;
     stime = stime * 1000000 + timestamp.tv_usec;
-    /*modify add end*/
+    /*modify add end */
+    /*modify original moving after lell_print()
 	printf("systime=%llu freq=%d addr=%08x delta_t=%.03f ms rssi=%d\n",
-	       /*modify replace "systime" with "stime"*/
+	/*modify replace "systime" with "stime"
 		stime,
            rx->channel + 2402, lell_get_access_address(pkt),
 	       ts_diff / 10000.0, rx->rssi_min - 54);
-
+    modify original*/
 	int len = (rx->data[5] & 0x3f) + 6 + 3;
 	if (len > 50) len = 50;
-
+    /*modify commented out
 	for (i = 4; i < len; ++i)
 		printf("%02x ", rx->data[i]);
 	printf("\n");
-
+    modify end */
 	lell_print(pkt);
+    /* modify commented out
 	printf("\n");
+    modify end */
+    /* modify add */
+    printf("systime=%llu rssi=%d\n", stime, rx->rssi_min - 54);
+    printf("\n");
+    /* modify add end */
 
 	lell_packet_unref(pkt);
 
