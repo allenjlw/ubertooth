@@ -26,6 +26,7 @@
 #include <unistd.h>
 /*modify add*/
 #include <sys/time.h>
+#include "bluetooth_le_packet.h"
 /*modify add end*/
 
 #include "ubertooth_callback.h"
@@ -432,13 +433,15 @@ void cb_btle(ubertooth_t* ut, void* args)
 		printf("%02x ", rx->data[i]);
 	printf("\n");
     modify end */
-	lell_print(pkt);
+    /* modify add */
+    if(pkt->adv_type == ADV_IND || pkt->adv_type == ADV_NONCONN_IND || pkt->adv_type == CONNECT_REQ || pkt->adv_type == ADV_SCAN_IND){
+        lell_print(pkt);
     /* modify commented out
 	printf("\n");
     modify end */
-    /* modify add */
-    printf("systime=%llu rssi=%d\n", stime, rx->rssi_min - 54);
-    printf("\n");
+        printf("systime=%llu rssi=%d\n", stime, rx->rssi_min - 54);
+        printf("\n");
+    }
     /* modify add end */
 
 	lell_packet_unref(pkt);
