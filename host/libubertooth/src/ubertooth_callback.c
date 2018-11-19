@@ -434,7 +434,9 @@ void cb_btle(ubertooth_t* ut, void* args)
 	printf("\n");
     modify end */
     /* modify add */
-    if(pkt->adv_type == ADV_IND || pkt->adv_type == ADV_NONCONN_IND || pkt->adv_type == CONNECT_REQ || pkt->adv_type == ADV_SCAN_IND){
+    if(pkt->adv_type == ADV_IND || pkt->adv_type == ADV_NONCONN_IND ||
+        pkt->adv_type == CONNECT_REQ || pkt->adv_type == ADV_SCAN_IND ||
+        pkt->adv_type == SCAN_REQ || pkt->adv_type == SCAN_RSP){
         lell_print(pkt);
     /* modify commented out
 	printf("\n");
