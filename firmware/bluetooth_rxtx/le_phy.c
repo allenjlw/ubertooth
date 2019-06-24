@@ -71,6 +71,9 @@ typedef struct _le_rx_t {
 	int available;              // 1 if available, 0 in use
 	int8_t rssi_min, rssi_max;  // min and max RSSI observed values
 	int rssi_sum;               // running sum of all RSSI values
+    int8_t rssi_cnt;
+    int8_t offset_min;
+    int offset_sum;
 } le_rx_t;
 
 // pool of all buffers
@@ -174,6 +177,10 @@ static void buffer_clear(le_rx_t *buf) {
 	buf->rssi_min = INT8_MAX;
 	buf->rssi_max = INT8_MIN;
 	buf->rssi_sum = 0;
+
+    buf->offset_min = INT8_MAX;
+    buf->offset_sum = 0;
+    buf->rssi_cnt = 0;
 }
 
 // get a packet buffer
@@ -298,22 +305,37 @@ static void finish_conn_event(void) {
 void le_DMA_IRQHandler(void) {
 	unsigned pos;
 	int8_t rssi;
+    int8_t offset;
 	uint32_t timestamp = NOW; // sampled early for most accurate measurement
 
+    // offset = (int8_t)(cc2400_get(RSSI) >> 8);
 	// channel 0
 	if (DMACIntStat & (1 << 0)) {
 		// terminal count - byte received
 		if (DMACIntTCStat & (1 << 0)) {
 			DMACIntTCClear = (1 << 0);
 
-			// poll RSSI
-			rssi = (int8_t)(cc2400_get(RSSI) >> 8);
+			pos = current_rxbuf->pos;
+
+            if(pos % 2 == 0){
+			    // poll RSSI
+			    rssi = (int8_t)(cc2400_get(RSSI) >> 8);
+                current_rxbuf->rssi_cnt += 1;
+            }
+            else{
+                offset = (int8_t)(cc2400_get(FREQEST) >> 8);
+            }
+
 			current_rxbuf->rssi_sum += rssi;
 			if (rssi < current_rxbuf->rssi_min) current_rxbuf->rssi_min = rssi;
 			if (rssi > current_rxbuf->rssi_max) current_rxbuf->rssi_max = rssi;
 
+            current_rxbuf->offset_sum += offset;
+            if (offset < current_rxbuf->offset_min){
+                current_rxbuf->offset_min = offset;
+            }
+
 			// grab byte from DMA buffer
-			pos = current_rxbuf->pos;
 			current_rxbuf->data[pos] = le_dma_dest[pos & 1]; // dirty hack
 			pos += 1;
 			current_rxbuf->pos = pos;
@@ -716,10 +738,13 @@ static int usb_enqueue_le(le_rx_t *packet) {
 	f->clk100ns = packet->timestamp;
 
 	f->channel = (uint8_t)((packet->channel - 2402) & 0xff);
-	f->rssi_avg = packet->rssi_sum / packet->size;
+	f->rssi_avg = packet->rssi_sum / (int) packet->rssi_cnt;
 	f->rssi_min = packet->rssi_min;
 	f->rssi_max = packet->rssi_max;
 	f->rssi_count = 0;
+
+    f->offset_min = packet->offset_min;
+    f->offset_avg = packet->offset_sum / (int) (packet->size - packet->rssi_cnt);
 
 	memcpy(f->data, &packet->access_address, 4);
 	memcpy(f->data+4, packet->data, DMA_SIZE-4);

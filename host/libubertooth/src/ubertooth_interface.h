@@ -167,7 +167,9 @@ typedef struct {
 	int8_t   rssi_min;   // Min ...
 	int8_t   rssi_avg;   // Average ...
 	uint8_t  rssi_count; // Number of ... (0 means RSSI stats are invalid)
-	uint8_t  reserved[2];
+	//uint8_t  reserved[2];
+    int8_t   offset_avg;
+    int8_t   offset_min;
 	uint8_t  data[DMA_SIZE];
 } usb_pkt_rx;
 

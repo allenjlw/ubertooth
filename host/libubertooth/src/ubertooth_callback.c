@@ -440,7 +440,8 @@ void cb_btle(ubertooth_t* ut, void* args)
     /* modify commented out
 	printf("\n");
     modify end */
-        printf("systime=%llu rssi=%d\n", stime, rx->rssi_min - 54);
+        printf("systime=%llu rssi_min=%d, rssi_max=%d, rssi_avg=%d, cfo_min=%d, cfo_avg=%d\n", stime,
+                rx->rssi_min - 54, rx->rssi_max - 54, rx->rssi_avg - 54, rx->offset_min, rx->offset_avg);
         printf("\n");
     }
     /* modify add end */
